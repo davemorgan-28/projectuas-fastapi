@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Tentang Model SVR &amp; Evaluasi{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+    <h1 class="text-xl font-bold text-slate-900 mb-2">Tentang Model Support Vector Regression (SVR)</h1>
+    <p class="text-sm text-slate-600 leading-relaxed">
+      Model ini dilatih menggunakan dataset publik <strong>Heart Failure Clinical Records</strong> (299 pasien, 11 fitur input klinis). Fitur <code>time</code> (durasi pemantauan pasien) sengaja dikecualikan karena tidak diketahui saat pasien baru diperiksa dan berpotensi menimbulkan kebocoran data (<em>target leakage</em>).
+    </p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+      <div class="p-4 rounded-lg bg-slate-50 border border-slate-200">
+        <div class="text-xs font-semibold uppercase text-slate-500">Test MAE (Skala 0–100)</div>
+        <div class="text-2xl font-extrabold text-slate-900 mt-1">{{ metrics.get('test_metrics', {}).get('mae', 27.20) }}</div>
+        <div class="text-xs text-slate-500 mt-1">Rata-rata selisih absolut pada 60 sampel uji</div>
+      </div>
+      <div class="p-4 rounded-lg bg-slate-50 border border-slate-200">
+        <div class="text-xs font-semibold uppercase text-slate-500">Test RMSE (Skala 0–100)</div>
+        <div class="text-2xl font-extrabold text-slate-900 mt-1">{{ metrics.get('test_metrics', {}).get('rmse', 37.81) }}</div>
+        <div class="text-xs text-slate-500 mt-1">Akar rata-rata kuadrat galat pada data uji</div>
+      </div>
+      <div class="p-4 rounded-lg bg-slate-50 border border-slate-200">
+        <div class="text-xs font-semibold uppercase text-slate-500">Test R² Score</div>
+        <div class="text-2xl font-extrabold text-slate-900 mt-1">{{ metrics.get('test_metrics', {}).get('r2', 0.3393) }}</div>
+        <div class="text-xs text-slate-500 mt-1">Proporsi variansi target yang dijelaskan model</div>
+      </div>
+    </div>
+
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-slate-600">
+      <div class="p-4 rounded-lg bg-slate-50 border border-slate-200">
+        <h3 class="font-bold text-slate-800 mb-2">Hyperparameter Terbaik (GridSearchCV 5-Fold)</h3>
+        <ul class="space-y-1">
+          <li><strong>Kernel:</strong> Radial Basis Function (<code>rbf</code>)</li>
+          <li><strong>Regularisasi (C):</strong> <code>{{ metrics.get('best_params', {}).get('C', 50.0) }}</code></li>
+          <li><strong>Koefisien Kernel (gamma):</strong> <code>{{ metrics.get('best_params', {}).get('gamma', 0.05) }}</code></li>
+          <li><strong>Lebar Tube (epsilon):</strong> <code>{{ metrics.get('best_params', {}).get('epsilon', 5.0) }}</code></li>
+        </ul>
+      </div>
+      <div class="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-900">
+        <h3 class="font-bold mb-2">Keterbatasan Klinis &amp; Statistik</h3>
+        <p class="text-xs leading-relaxed">
+          Dataset hanya terdiri atas 299 pasien dari satu institusi dan memiliki target asli biner (<code>0</code> atau <code>1</code>). Skor kontinu 0–100 merepresentasikan interpolasi jarak kernel RBF terhadap profil historis, bukan probabilitas mortalitas klinis yang terkalibrasi.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

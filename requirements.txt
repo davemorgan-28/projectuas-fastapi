@@ -1,0 +1,27 @@
+# Framework Web & Server ASGI
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+jinja2==3.1.4
+python-multipart==0.0.17
+
+# Validasi Data & Manajemen Environment Variable
+pydantic==2.10.2
+pydantic-settings==2.6.1
+python-dotenv==1.0.1
+
+# Database ORM, Driver PostgreSQL & Migrasi Skema
+sqlalchemy==2.0.36
+psycopg2-binary==2.9.10
+alembic==1.14.0
+
+# Machine Learning, Data Science & Visualisasi
+scikit-learn==1.5.2
+pandas==2.2.3
+numpy==2.1.3
+joblib==1.4.2
+matplotlib==3.9.2
+seaborn==0.13.2
+
+# Pengujian Otomatis (Testing)
+pytest==8.3.3
+httpx==0.28.0

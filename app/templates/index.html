@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}Kalkulator Skor Risiko Gagal Jantung{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+  <!-- Kolom Kiri: Formulir Input Klinis -->
+  <div class="lg:col-span-7 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+    <h1 class="text-xl font-bold text-slate-900 mb-1">Input Parameter Klinis Pasien</h1>
+    <p class="text-sm text-slate-500 mb-6">
+      Masukkan 11 indikator laboratorium dan riwayat klinis di bawah ini untuk menghitung estimasi skor risiko (0–100).
+    </p>
+
+    <form action="/predict-web" method="post" class="space-y-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- 1. Usia -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Usia (Tahun)</label>
+          <input type="number" step="0.1" min="18" max="110" name="age" required
+                 value="{{ form_data.get('age', 60) }}"
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500" />
+          <span class="text-xs text-slate-400">Rentang valid: 18 – 110 tahun</span>
+        </div>
+
+        <!-- 2. Jenis Kelamin -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Jenis Kelamin</label>
+          <select name="sex" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+            <option value="1" {% if form_data.get('sex', 1) == 1 %}selected{% endif %}>Laki-laki (1)</option>
+            <option value="0" {% if form_data.get('sex') == 0 %}selected{% endif %}>Perempuan (0)</option>
+          </select>
+        </div>
+
+        <!-- 3. Fraksi Ejeksi -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Fraksi Ejeksi / Ejection Fraction (%)</label>
+          <input type="number" step="0.1" min="10" max="85" name="ejection_fraction" required
+                 value="{{ form_data.get('ejection_fraction', 38) }}"
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500" />
+          <span class="text-xs text-slate-400">Normal: 50% – 70% (Rentang: 10 – 85)</span>
+        </div>
+
+        <!-- 4. Kreatinin Serum -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Kreatinin Serum (mg/dL)</label>
+          <input type="number" step="0.01" min="0.2" max="15.0" name="serum_creatinine" required
+                 value="{{ form_data.get('serum_creatinine', 1.1) }}"
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500" />
+          <span class="text-xs text-slate-400">Normal: 0.6 – 1.3 mg/dL</span>
+        </div>
+
+        <!-- 5. Natrium Serum -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Natrium Serum (mEq/L)</label>
+          <input type="number" step="0.1" min="105" max="165" name="serum_sodium" required
+                 value="{{ form_data.get('serum_sodium', 137) }}"
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500" />
+          <span class="text-xs text-slate-400">Normal: 135 – 145 mEq/L</span>
+        </div>
+
+        <!-- 6. Enzim CPK -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Creatinine Phosphokinase / CPK (mcg/L)</label>
+          <input type="number" step="1" min="10" max="10000" name="creatinine_phosphokinase" required
+                 value="{{ form_data.get('creatinine_phosphokinase', 250) }}"
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500" />
+          <span class="text-xs text-slate-400">Rentang valid: 10 – 10.000 mcg/L</span>
+        </div>
+
+        <!-- 7. Trombosit (Platelets) -->
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Trombosit / Platelets (kiloplatelets/mL)</label>
+          <input type="number" step="100" min="15000" max="1000000" name="platelets" required
+                 value="{{ form_data.get('platelets', 262000) }}"
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500" />
+          <span class="text-xs text-slate-400">Normal: 150.000 – 450.000 kiloplatelets/mL</span>
+        </div>
+
+        <!-- 8. Anemia -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Riwayat Anemia</label>
+          <select name="anaemia" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <option value="0" {% if form_data.get('anaemia', 0) == 0 %}selected{% endif %}>Tidak (0)</option>
+            <option value="1" {% if form_data.get('anaemia') == 1 %}selected{% endif %}>Ya (1)</option>
+          </select>
+        </div>
+
+        <!-- 9. Diabetes -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Riwayat Diabetes</label>
+          <select name="diabetes" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <option value="0" {% if form_data.get('diabetes', 0) == 0 %}selected{% endif %}>Tidak (0)</option>
+            <option value="1" {% if form_data.get('diabetes') == 1 %}selected{% endif %}>Ya (1)</option>
+          </select>
+        </div>
+
+        <!-- 10. Tekanan Darah Tinggi -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Tekanan Darah Tinggi (Hipertensi)</label>
+          <select name="high_blood_pressure" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <option value="0" {% if form_data.get('high_blood_pressure', 0) == 0 %}selected{% endif %}>Tidak (0)</option>
+            <option value="1" {% if form_data.get('high_blood_pressure') == 1 %}selected{% endif %}>Ya (1)</option>
+          </select>
+        </div>
+
+        <!-- 11. Status Merokok -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Perokok Aktif</label>
+          <select name="smoking" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <option value="0" {% if form_data.get('smoking', 0) == 0 %}selected{% endif %}>Tidak (0)</option>
+            <option value="1" {% if form_data.get('smoking') == 1 %}selected{% endif %}>Ya (1)</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit"
+              class="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition">
+        Hitung Skor Risiko &amp; Simpan ke Database
+      </button>
+    </form>
+  </div>
+
+  <!-- Kolom Kanan: Panel Hasil Prediksi & Progress Bar / Gauge Berwarna -->
+  <div class="lg:col-span-5 space-y-6">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+      <h2 class="text-lg font-bold text-slate-900 mb-4">Hasil Estimasi Skor Risiko</h2>
+
+      {% if result %}
+        {% if result.risk_category == 'Rendah' %}
+          {% set badge_bg = 'bg-emerald-100 text-emerald-800 border-emerald-300' %}
+          {% set bar_color = 'bg-emerald-500' %}
+        {% elif result.risk_category == 'Sedang' %}
+          {% set badge_bg = 'bg-amber-100 text-amber-800 border-amber-300' %}
+          {% set bar_color = 'bg-amber-500' %}
+        {% else %}
+          {% set badge_bg = 'bg-rose-100 text-rose-800 border-rose-300' %}
+          {% set bar_color = 'bg-rose-600' %}
+        {% endif %}
+
+        <div class="text-center py-4">
+          <span class="inline-block px-3.5 py-1 rounded-full text-xs font-bold uppercase border {{ badge_bg }}">
+            Kategori Risiko: {{ result.risk_category }}
+          </span>
+          <div class="text-5xl font-extrabold text-slate-900 mt-3">
+            {{ "%.1f"|format(result.risk_score) }}
+            <span class="text-lg font-normal text-slate-400">/ 100</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">ID Prediksi #{{ result.id }} &bull; Tersimpan di PostgreSQL</p>
+        </div>
+
+        <!-- Visual Gauge / Progress Bar Berwarna Sesuai Kategori -->
+        <div class="mt-4">
+          <div class="flex justify-between text-xs font-medium text-slate-500 mb-1">
+            <span>Rendah (0–33)</span>
+            <span>Sedang (34–66)</span>
+            <span>Tinggi (67–100)</span>
+          </div>
+          <div class="w-full h-4 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+            <div class="h-full {{ bar_color }} transition-all duration-500"
+            {{ 'style="width: ' ~ result.risk_score ~ '%;"' }}></div>
+          </div>
+        </div>
+
+        <!-- Kotak Penjelasan Kategori & Disclaimer Medis -->
+        <div class="mt-6 p-4 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-2">
+          <p>
+            <strong>Catatan Metodologis:</strong> Skor ini dihitung oleh model <em>Support Vector Regression (RBF)</em> yang dilatih pada target biner <code>DEATH_EVENT</code> yang diskalakan ke 0–100. Skor ini <strong>bukan probabilitas kesintasan klinis yang terkalibrasi</strong>.
+          </p>
+          <p class="text-amber-800 font-medium">
+            <strong>Disclaimer:</strong> Jangan gunakan skor ini untuk mengambil keputusan pengobatan mandiri. Segera hubungi dokter atau fasilitas layanan kesehatan jika mengalami keluhan sesak napas, nyeri dada, atau kelelahan ekstrem.
+          </p>
+        </div>
+      {% else %}
+        <div class="py-12 text-center text-sm text-slate-400">
+          Silakan isi formulir parameter klinis di sebelah kiri dan tekan tombol <strong>Hitung Skor Risiko</strong> untuk melihat visualisasi gauge dan menyimpan riwayat prediksi.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

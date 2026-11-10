@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Riwayat Prediksi Risiko Gagal Jantung{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-xl font-bold text-slate-900">Riwayat Prediksi Tersimpan</h1>
+      <p class="text-sm text-slate-500">Total {{ pagination.total }} catatan prediksi tersimpan di tabel <code>predictions</code> PostgreSQL.</p>
+    </div>
+    <a href="/" class="text-sm font-semibold bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg">
+      + Buat Prediksi Baru
+    </a>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-left border-collapse text-sm">
+      <thead>
+        <tr class="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-600">
+          <th class="py-3 px-3">ID</th>
+          <th class="py-3 px-3">Waktu (UTC)</th>
+          <th class="py-3 px-3">Usia / JK</th>
+          <th class="py-3 px-3">EF (%)</th>
+          <th class="py-3 px-3">Kreatinin</th>
+          <th class="py-3 px-3">Natrium</th>
+          <th class="py-3 px-3">CPK</th>
+          <th class="py-3 px-3">Skor (0–100)</th>
+          <th class="py-3 px-3">Kategori</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200">
+        {% for item in pagination.items %}
+        <tr class="hover:bg-slate-50">
+          <td class="py-3 px-3 font-semibold text-slate-700">#{{ item.id }}</td>
+          <td class="py-3 px-3 text-xs text-slate-500">{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td class="py-3 px-3">{{ item.age|int }} thn / {{ 'L' if item.sex == 1 else 'P' }}</td>
+          <td class="py-3 px-3">{{ item.ejection_fraction }}%</td>
+          <td class="py-3 px-3">{{ item.serum_creatinine }} mg/dL</td>
+          <td class="py-3 px-3">{{ item.serum_sodium }} mEq/L</td>
+          <td class="py-3 px-3">{{ item.creatinine_phosphokinase|int }}</td>
+          <td class="py-3 px-3 font-bold">{{ "%.1f"|format(item.risk_score) }}</td>
+          <td class="py-3 px-3">
+            {% if item.risk_category == 'Rendah' %}
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Rendah</span>
+            {% elif item.risk_category == 'Sedang' %}
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">Sedang</span>
+            {% else %}
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800">Tinggi</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="9" class="py-8 text-center text-slate-400">Belum ada riwayat prediksi yang tersimpan.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Navigasi Paginasi -->
+  <div class="mt-6 flex items-center justify-between text-sm text-slate-600">
+    <span>Halaman {{ pagination.page }} dari {{ pagination.total_pages }}</span>
+    <div class="flex gap-2">
+      {% if pagination.page > 1 %}
+        <a href="/riwayat?page={{ pagination.page - 1 }}&page_size={{ pagination.page_size }}"
+           class="px-3 py-1.5 rounded border border-slate-300 hover:bg-slate-100">Sebelumnya</a>
+      {% endif %}
+      {% if pagination.page < pagination.total_pages %}
+        <a href="/riwayat?page={{ pagination.page + 1 }}&page_size={{ pagination.page_size }}"
+           class="px-3 py-1.5 rounded border border-slate-300 hover:bg-slate-100">Berikutnya</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
